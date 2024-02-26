@@ -1,0 +1,1 @@
+gtdb_scale3000_pretrained.tar.gz filter=lfs diff=lfs merge=lfs -text
