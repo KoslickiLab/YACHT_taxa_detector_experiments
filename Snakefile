@@ -1,9 +1,3 @@
-rule download_yacht:
-    output:
-	"env/yacht_env.yml"
-    shell:
-        "git clone git@github.com:KoslickiLab/YACHT.git && cd YACHT"
-
 rule download_sample:
     output:
         "sample_file.tar.gz"
@@ -45,7 +39,7 @@ rule sketch_sample:
     output:
         "sample.sig.zip"
     conda:
-        "env/yacht_env.yml"
+        "YACHT/env/yacht_env.yml"
     shell:
         "yacht sketch sample --infile {input} --kmer 31 --scaled 3000 --outfile {output}"
 
@@ -62,7 +56,7 @@ rule run_yacht:
     output:
         "result.xlsx"
     conda:
-        "env/yacht_env.yml"
+        "YACHT/env/yacht_env.yml"
     shell:
         "yacht run --json '{input[1]}' --sample_file '{input[0]}' --num_threads 32 --keep_raw --significance 0.99 --min_coverage_list 1 0.5 0.1 0.05 0.01 --out {output}"
 
@@ -81,7 +75,7 @@ rule convert_yacht_output:
     output:
         "cami_result.cami"
     conda:
-        "env/yacht_env.yml"
+        "YACHT/env/yacht_env.yml"
     shell:
         "yacht convert --yacht_output '{input[0]}' --sheet_name 'raw_result' --genome_to_taxid '{input[1]}' --mode 'cami' --sample_name 'marmgCAMI2_short_read_sample_0' --outfile_prefix 'cami_result' --outdir ./"
 
