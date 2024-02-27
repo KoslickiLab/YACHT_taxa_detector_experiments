@@ -46,8 +46,23 @@ rule sketch_sample:
 rule unzip_ref:
     output:
         "refs/refdb_config.json"
-    shell:
-        "tar -xvzf gtdb_scale3000_pretrained.tar.gz"
+    run:
+        import os
+	import json
+	
+        shell("tar -xvzf gtdb_scale3000_pretrained.tar.gz")
+
+        f = open('refs/refdb_config.json')
+	data = json.load(f)
+	f.close()
+
+        data['manifest_file_path'] = os.getcwd() + '/refs/refdb_processed_manifest.tsv'
+	data['remove_cor_df_path'] = os.getcwd() + '/refs/refdb_removed_orgs_to_corr_orgas_mapping.tsv'
+	data['intermediate_files_dir'] = os.getcwd() + '/refs/refdb_intermediate_files.tsv'
+
+        f = open('refs/refdb_config.json', 'w')
+	json.dump(data, f)
+	f.close()
 
 rule run_yacht:
     input:
