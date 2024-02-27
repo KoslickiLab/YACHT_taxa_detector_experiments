@@ -58,7 +58,7 @@ rule unzip_ref:
 
         data['manifest_file_path'] = os.getcwd() + '/refs/refdb_processed_manifest.tsv'
 	data['remove_cor_df_path'] = os.getcwd() + '/refs/refdb_removed_orgs_to_corr_orgas_mapping.tsv'
-	data['intermediate_files_dir'] = os.getcwd() + '/refs/refdb_intermediate_files.tsv'
+	data['intermediate_files_dir'] = os.getcwd() + '/refs/refdb_intermediate_files'
 
         f = open('refs/refdb_config.json', 'w')
 	json.dump(data, f)
