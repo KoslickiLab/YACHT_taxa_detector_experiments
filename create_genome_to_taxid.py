@@ -29,8 +29,9 @@ with alive_bar(stop - 1) as bar:
         for id in Entrez.read(search)['IdList']:
             id_list.append(id)
             bar()
-        time.sleep(0.25)
+        time.sleep(0.3)
 
+time.sleep(3)
 print('Fetching taxids')
 with alive_bar(len(id_list)) as bar:
     for i in range(0, len(id_list), batch_size):
