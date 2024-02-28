@@ -80,6 +80,8 @@ rule create_genome_to_taxid:
         "result.xlsx"
     output:
         "genome_to_taxid.tsv"
+    conda:
+        "cami_env.yaml"
     script:
         "create_genome_to_taxid.py"
 
