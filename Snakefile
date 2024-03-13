@@ -94,7 +94,7 @@ rule convert_yacht_output:
     conda:
         "yacht_env"
     shell:
-        "yacht convert --yacht_output '{input[0]}' --sheet_name 'raw_result' --genome_to_taxid '{input[1]}' --mode 'cami' --sample_name 'marmgCAMI2_short_read_sample_0' --outfile_prefix 'cami_result' --outdir ./"
+        "yacht convert --yacht_output '{input[0]}' --sheet_name 'min_coverage0.1' --genome_to_taxid '{input[1]}' --mode 'cami' --sample_name 'marmgCAMI2_short_read_sample_0' --outfile_prefix 'cami_result' --outdir ./"
 
 rule download_gt:
     output:
