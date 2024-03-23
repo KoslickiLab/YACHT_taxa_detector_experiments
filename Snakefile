@@ -41,39 +41,18 @@ rule sketch_sample:
     conda:
         "yacht_env"
     shell:
-        "yacht sketch sample --infile {input} --kmer 31 --scaled 3000 --outfile {output}"
-
-rule unzip_ref:
-    output:
-        "refs/refdb_config.json"
-    run:
-        import os
-	import json
-	
-        shell("tar -xvzf gtdb_scale3000_pretrained.tar.gz")
-
-        f = open('refs/refdb_config.json')
-	data = json.load(f)
-	f.close()
-
-        data['manifest_file_path'] = os.getcwd() + '/refs/refdb_processed_manifest.tsv'
-	data['remove_cor_df_path'] = os.getcwd() + '/refs/refdb_removed_orgs_to_corr_orgas_mapping.tsv'
-	data['intermediate_files_dir'] = os.getcwd() + '/refs/refdb_intermediate_files'
-
-        f = open('refs/refdb_config.json', 'w')
-	json.dump(data, f)
-	f.close()
+        "yacht sketch sample --infile {input} --kmer 31 --scaled 100 --outfile {output}"
 
 rule run_yacht:
     input:
         "sample.sig.zip",
-	"refs/refdb_config.json"
+        "ref/customized_ncbi_ani_thresh_0.95_config.json"
     output:
         "result.xlsx"
     conda:
         "yacht_env"
     shell:
-        "yacht run --json '{input[1]}' --sample_file '{input[0]}' --num_threads 32 --keep_raw --significance 0.99 --min_coverage_list 1 0.5 0.1 0.05 0.01 --out {output}"
+        "yacht run --json '{input[1]}' --sample_file '{input[0]}' --num_threads 64 --keep_raw --significance 0.99 --min_coverage_list 1 0.5 0.1 0.05 0.01 --out {output}"
 
 rule create_genome_to_taxid:
     input:
@@ -105,7 +84,7 @@ rule download_gt:
 rule run_cami:
     input:
         "cami_result.cami",
-	"gs_marine_short.profile"
+        "gs_marine_short.profile"
     output:
         "results/results.html"
     conda:
