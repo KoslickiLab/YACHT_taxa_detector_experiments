@@ -62,7 +62,7 @@ rule create_genome_to_taxid:
     conda:
         "cami_env.yaml"
     script:
-        "create_genome_to_taxid.py"
+        "create_genome_to_taxid_ncbi.py"
 
 rule convert_yacht_output:
     input:
