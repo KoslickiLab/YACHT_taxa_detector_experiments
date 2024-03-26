@@ -8,8 +8,13 @@ workbook = load_workbook(filename=file)
 sheet = workbook.active
 
 name_to_taxid = {}
-for cell in sheet['A']:
-    name_to_taxid[cell.value] = cell.value[6:]
+
+print('Reading ncbi_database_metadata.tsv')
+with open('ncbi_database_metadata.tsv', 'r') as ref:
+    reader = csv.reader(ref, delimiter='\t', lineterminator='\n')
+    reader.__next__()
+    for row in reader:
+        name_to_taxid[row[0]] = row[1]
 
 print('Creating genome_to_taxid.tsv')
 with open('genome_to_taxid.tsv', 'w', newline='') as tsvfile:
