@@ -5,7 +5,7 @@ import csv
 import time
 
 Entrez.email = 'okb5109@psu.edu'
-file = 'result.xlsx'
+file = snakemake.input[0]
 batch_size = 100
 
 print('Reading ' + file)
@@ -67,7 +67,7 @@ for i in range(1, len(names)):
         exit(-1)
 
 print('Creating genome_to_taxid.tsv')
-with open('genome_to_taxid.tsv', 'w', newline='') as tsvfile:
+with open(snakemake.outputs[0], 'w', newline='') as tsvfile:
     writer = csv.writer(tsvfile, delimiter='\t', lineterminator='\n')
     writer.writerow(['genome_id', 'taxid'])
     for i in range(1, len(names)):

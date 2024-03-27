@@ -1,7 +1,7 @@
 from openpyxl import load_workbook
 import csv
 
-file = 'result.xlsx'
+file = snakemake.inputs[0]
 
 print('Reading ' + file)
 workbook = load_workbook(filename=file)
@@ -17,7 +17,7 @@ with open('ncbi_database_metadata.tsv', 'r') as ref:
         name_to_taxid[row[0]] = row[1]
 
 print('Creating genome_to_taxid.tsv')
-with open('genome_to_taxid.tsv', 'w', newline='') as tsvfile:
+with open(snakemake.outputs[0], 'w', newline='') as tsvfile:
     writer = csv.writer(tsvfile, delimiter='\t', lineterminator='\n')
     writer.writerow(['genome_id', 'taxid'])
     for key in name_to_taxid.keys():
