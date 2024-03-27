@@ -1,10 +1,13 @@
 configfile: "config.yaml"
 
+wildcard_constraints:
+    dataset="\d"
+
 rule download_sample:
     output:
         "sample_files/sample_file{num}.tar.gz"
     shell:
-        "mkdir -p sample_files; wget -O ./{input} https://frl.publisso.de/data/frl:6425521/marine/short_read/marmgCAMI2_sample_{}_reads.tar.gz"
+        "mkdir -p sample_files; wget -O ./{input} https://frl.publisso.de/data/frl:6425521/marine/short_read/marmgCAMI2_sample_{wildcards.num}_reads.tar.gz"
 
 rule unzip_sample_step1:
     input:
@@ -20,20 +23,10 @@ rule unzip_sample_step2:
         "sample_folders/sample{num}/simulation_short_read/2018.08.15_09.49.32_sample_{num}/reads/anonymous_reads.fq.gz",
         "sample_folders/sample{num}/simulation_short_read/2018.08.15_09.49.32_sample_{num}/reads/reads_mapping.tsv.gz"
     output:
-        "sample_folders/sample{num}/anonymous_reads.fq.gz",
-        "sample_folders/sample{num}/reads_mapping.tsv.gz"
-    shell:
-        "cp {input[0]} {output[0]}; cp {input[1]} {output[1]}"
-
-rule unzip_sample_step3:
-    input:
-        "sample_folders/sample{num}/anonymous_reads.fq.gz",
-        "sample_folders/sample{num}/reads_mapping.tsv.gz"
-    output:
         "sample_folders/sample{num}/anonymous_reads.fq",
         "sample_folders/sample{num}/reads_mapping.tsv"
     shell:
-        "gzip -dv {input[0]}; gzip -dv {input[1]}"
+        "cp {input[0]} {output[0]}.gz; cp {input[1]} {output[1]}.gz; gzip -dv {output[0]}.gz; gzip -dv {output[1]}.gz"
 
 scaled = ("100" if config["use_ncbi_database"] else "1000")
 
