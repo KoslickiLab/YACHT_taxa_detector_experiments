@@ -7,7 +7,7 @@ rule download_sample:
     output:
         "sample_files/sample_file{num}.tar.gz"
     shell:
-        "mkdir -p sample_files; wget -O ./{input} https://frl.publisso.de/data/frl:6425521/marine/short_read/marmgCAMI2_sample_{wildcards.num}_reads.tar.gz"
+        "mkdir -p sample_files; wget -O ./{output} https://frl.publisso.de/data/frl:6425521/marine/short_read/marmgCAMI2_sample_{wildcards.num}_reads.tar.gz"
 
 rule unzip_sample_step1:
     input:
@@ -59,7 +59,7 @@ rule run_yacht:
     conda:
         "yacht_env"
     shell:
-        "yacht run --json '{input[1]}' --sample_file '{input[0]}' --num_threads 64 --keep_raw --significance 0.99 --min_coverage_list 1 0.5 0.1 0.05 0.01 --out {output}"
+        "yacht run --json '{input[1]}' --sample_file '{input[0]}' --num_threads 16 --keep_raw --significance 0.99 --min_coverage_list 1 0.5 0.1 0.05 0.01 --out {output}"
 
 genome_to_taxid_script = ("create_genome_to_taxid_ncbi.py" if config["use_ncbi_database"] else "create_genome_to_taxid_gtdb.py")
 
