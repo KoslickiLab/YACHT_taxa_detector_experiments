@@ -68,7 +68,7 @@ for k in range(num_samples):
             print(f'Still could not find taxid for genome {names[i]}')
             exit(-1)
 
-    print('Creating' + snakemake.output[k])
+    print('Creating ' + snakemake.output[k])
     with open(snakemake.output[k], 'w', newline='') as tsvfile:
         writer = csv.writer(tsvfile, delimiter='\t', lineterminator='\n')
         writer.writerow(['genome_id', 'taxid'])

@@ -1,5 +1,7 @@
 rm -rf results
-rm sample.sig.zip
-rm genome_to_taxid.tsv
+rm -rf sample_sketches
+rm -rf yacht_outputs
+rm -rf genome_metadata
+rm -rf cami_results
 rm cami_result.cami
-rm result.xlsx
+rm -rf results

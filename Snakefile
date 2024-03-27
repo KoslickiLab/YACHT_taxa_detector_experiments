@@ -34,11 +34,11 @@ rule sketch_sample:
     input:
         "sample_folders/sample{num}/anonymous_reads.fq"
     output:
-        "sample{num}.sig.zip"
+        "sample_sketches/sample{num}.sig.zip"
     conda:
         "yacht_env"
     shell:
-        "yacht sketch sample --infile {input} --kmer 31 --scaled {scaled} --outfile {output}"
+        "mkdir -p sample_sketches; yacht sketch sample --infile {input} --kmer 31 --scaled {scaled} --outfile {output}"
 
 rule download_gtdb_ref:
     output:
@@ -52,14 +52,14 @@ ref_db = ("ref_ncbi/customized_ncbi_ani_thresh_0.95_config.json" if config["use_
 
 rule run_yacht:
     input:
-        "sample{num}.sig.zip",
+        "sample_sketches/sample{num}.sig.zip",
         ref_db
     output:
-        "result_sample{num}.xlsx"
+        "yacht_outputs/result_sample{num}.xlsx"
     conda:
         "yacht_env"
     shell:
-        "yacht run --json '{input[1]}' --sample_file '{input[0]}' --num_threads 16 --keep_raw --significance 0.99 --min_coverage_list 1 0.5 0.1 0.05 0.01 --out {output}"
+        "mkdir -p yacht_outputs; mkdir -p genome_metadata; yacht run --json '{input[1]}' --sample_file '{input[0]}' --num_threads 16 --keep_raw --significance 0.99 --min_coverage_list 1 0.5 0.1 0.05 0.01 --out {output}; rm -rf sample_sample{wildcards.num}_intermediate_files"
 
 genome_to_taxid_script = ("create_genome_to_taxid_ncbi.py" if config["use_ncbi_database"] else "create_genome_to_taxid_gtdb.py")
 
@@ -69,9 +69,9 @@ if num_samples < 1 or num_samples > 10:
 
 rule create_genome_to_taxid:
     input:
-        expand("result_sample{nums}.xlsx", nums=range(0, num_samples))
+        expand("yacht_outputs/result_sample{nums}.xlsx", nums=range(0, num_samples))
     output:
-        expand("genome_to_taxid_sample{nums}.tsv", nums=range(0, num_samples))
+        expand("genome_metadata/genome_to_taxid_sample{nums}.tsv", nums=range(0, num_samples))
     conda:
         "cami_env.yaml"
     script:
@@ -79,14 +79,14 @@ rule create_genome_to_taxid:
 
 rule convert_yacht_output:
     input:
-        "result_sample{num}.xlsx",
-        "genome_to_taxid_sample{num}.tsv"
+        "yacht_outputs/result_sample{num}.xlsx",
+        "genome_metadata/genome_to_taxid_sample{num}.tsv"
     output:
-        "cami_result_sample{num}.cami"
+        "cami_results/cami_result_sample{num}.cami"
     conda:
         "yacht_env"
     shell:
-        "yacht convert --yacht_output '{input[0]}' --sheet_name 'min_coverage0.1' --genome_to_taxid '{input[1]}' --mode 'cami' --sample_name 'marmgCAMI2_short_read_sample_{wildcards.num}' --outfile_prefix 'cami_result_sample{wildcards.num}' --outdir ./"
+        "mkdir -p cami_results; yacht convert --yacht_output '{input[0]}' --sheet_name 'min_coverage0.1' --genome_to_taxid '{input[1]}' --mode 'cami' --sample_name 'marmgCAMI2_short_read_sample_{wildcards.num}' --outfile_prefix 'cami_result_sample{wildcards.num}' --outdir cami_results"
 
 rule download_gt:
     output:
@@ -96,7 +96,7 @@ rule download_gt:
 
 rule combine_cami_results:
     input:
-        expand("cami_result_sample{nums}.cami", nums=range(0, num_samples))
+        expand("cami_results/cami_result_sample{nums}.cami", nums=range(0, num_samples))
     output:
         "cami_result.cami"
     shell:
