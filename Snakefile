@@ -63,11 +63,15 @@ rule run_yacht:
 
 genome_to_taxid_script = ("create_genome_to_taxid_ncbi.py" if config["use_ncbi_database"] else "create_genome_to_taxid_gtdb.py")
 
+num_samples = int(config["num_samples"])
+if num_samples < 1 or num_samples > 10:
+    exit(-1)
+
 rule create_genome_to_taxid:
     input:
-        "result_sample{num}.xlsx"
+        expand("result_sample{nums}.xlsx", nums=range(0, num_samples))
     output:
-        "genome_to_taxid_sample{num}.tsv"
+        expand("genome_to_taxid_sample{nums}.tsv", nums=range(0, num_samples))
     conda:
         "cami_env.yaml"
     script:
@@ -82,17 +86,13 @@ rule convert_yacht_output:
     conda:
         "yacht_env"
     shell:
-        "yacht convert --yacht_output '{input[0]}' --sheet_name 'min_coverage0.1' --genome_to_taxid '{input[1]}' --mode 'cami' --sample_name 'marmgCAMI2_short_read_sample_0' --outfile_prefix 'cami_result' --outdir ./"
+        "yacht convert --yacht_output '{input[0]}' --sheet_name 'min_coverage0.1' --genome_to_taxid '{input[1]}' --mode 'cami' --sample_name 'marmgCAMI2_short_read_sample_{wildcards.num}' --outfile_prefix 'cami_result_sample{wildcards.num}' --outdir ./"
 
 rule download_gt:
     output:
         "gs_marine_short.profile"
     shell:
         "wget https://raw.githubusercontent.com/CAMI-challenge/second_challenge_evaluation/master/profiling/marine_dataset/data/ground_truth/gs_marine_short.profile"
-
-num_samples = int(config["num_samples"])
-if num_samples < 1 or num_samples > 10:
-    exit(-1)
 
 rule combine_cami_results:
     input:
