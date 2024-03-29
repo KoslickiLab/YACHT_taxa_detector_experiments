@@ -48,7 +48,7 @@ rule download_gtdb_ref:
     shell:
         "yacht download pretrained_ref_db --database gtdb --db_version rs214 --k 31 --ani_thresh 0.9995 --outfolder ref_gtdb"
 
-ref_db = ("ref_ncbi/customized_ncbi_ani_thresh_0.95_config.json" if config["use_ncbi_database"] else "ref_gtdb/gtdb-rs214-reps.k31_0.9995_pretrained/gtdb-rs214-reps.k31_0.9995_config.json")
+ref_db = ("ref_ncbi/customized_ncbi_ani_thresh_0.995_config.json" if config["use_ncbi_database"] else "ref_gtdb/gtdb-rs214-reps.k31_0.9995_pretrained/gtdb-rs214-reps.k31_0.9995_config.json")
 
 rule run_yacht:
     input:
@@ -80,35 +80,35 @@ rule create_genome_to_taxid:
 rule convert_yacht_output:
     input:
         "yacht_outputs/result_sample{num}.xlsx",
-        "genome_metadata/genome_to_taxid_sample{num}.tsv"
+        "genome_metadata/genome_to_taxid_sample{num}.tsv",
     output:
-        "cami_results/cami_result_sample{num}.cami"
+        "cami_results/cami_result_sample{num}_min_coverage{cov}.cami"
     conda:
         "yacht_env"
     shell:
-        "mkdir -p cami_results; yacht convert --yacht_output '{input[0]}' --sheet_name 'min_coverage0.1' --genome_to_taxid '{input[1]}' --mode 'cami' --sample_name 'marmgCAMI2_short_read_sample_{wildcards.num}' --outfile_prefix 'cami_result_sample{wildcards.num}' --outdir cami_results"
+        "mkdir -p cami_results; yacht convert --yacht_output '{input[0]}' --sheet_name 'min_coverage{wildcards.cov}' --genome_to_taxid '{input[1]}' --mode 'cami' --sample_name 'marmgCAMI2_short_read_sample_{wildcards.num}' --outfile_prefix 'cami_result_sample{wildcards.num}_min_coverage{wildcards.cov}' --outdir cami_results"
 
 rule download_gt:
     output:
-        "gs_marine_short.profile"
+        "gs_marine_short.filtered.profile"
     shell:
-        "wget https://raw.githubusercontent.com/CAMI-challenge/second_challenge_evaluation/master/profiling/marine_dataset/data/ground_truth/gs_marine_short.profile"
+        "wget https://raw.githubusercontent.com/CAMI-challenge/second_challenge_evaluation/master/profiling/marine_dataset/data/ground_truth/gs_marine_short.filtered.profile"
 
 rule combine_cami_results:
     input:
-        expand("cami_results/cami_result_sample{nums}.cami", nums=range(0, num_samples))
+        expand("cami_results/cami_result_sample{nums}_min_coverage{{cov}}.cami", nums=range(0, num_samples))
     output:
-        "cami_result.cami"
+        "cami_results/cami_result_min_coverage{cov}.cami"
     shell:
-        "cat {input} > cami_result.cami"
+        "cat {input} > {output}"
 
 rule run_cami:
     input:
-        "cami_result.cami",
-        "gs_marine_short.profile"
+        cami_profiles = expand("cami_results/cami_result_min_coverage{cov}.cami", cov=["1.0", "0.5", "0.1", "0.05", "0.01"]),
+        gt_profile = "gs_marine_short.filtered.profile"
     output:
         "results/results.html"
     conda:
         "cami_env.yaml"
     shell:
-        "opal.py -g {input[1]} {input[0]} -o ./results"
+        "opal.py -g {input.gt_profile} {input.cami_profiles} -o ./results"
